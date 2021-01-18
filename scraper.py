@@ -17,6 +17,11 @@ cols = [x.text for x in headers]
 table_rows = table.find_all('tr')
 
 rows = []
+
+range1Wins = range1Loss = range2Wins = range2Loss = range3Wins = range3Loss \
+    = range4Wins = range4Loss = range5Wins = range5Loss = range6Wins = range6Loss \
+    = range7Wins = range7Loss = 0
+
 # Grab the text of each td, and put into a rows list
 for each in table_rows[1:]:
     odd_avail = True
@@ -74,12 +79,72 @@ for each in table_rows[1:]:
         diff = -1
         bet = '-'
 
+    # Beat the spread?
+    try:
+        beatSpread = data[4].find_all('img')[-1]['title']
+    except:
+        beatSpread = '-'
+
+    if beatSpread == 'Beat the Spread':
+        if 0 <= diff <= 2.9:
+            range1Wins += 1
+        if 3 <= diff <= 5.9:
+            range2Wins += 1
+        if 6 <= diff <= 8.9:
+            range3Wins += 1
+        if 9 <= diff <= 11.9:
+            range4Wins += 1
+        if 12 <= diff <= 14.9:
+            range5Wins += 1
+        if 15 <= diff <= 17.9:
+            range6Wins += 1
+        if diff >= 18:
+            range7Wins += 1
+    else:
+        if 0 <= diff <= 2.9:
+            range1Loss += 1
+        if 3 <= diff <= 5.9:
+            range2Loss += 1
+        if 6 <= diff <= 8.9:
+            range3Loss += 1
+        if 9 <= diff <= 11.9:
+            range4Loss += 1
+        if 12 <= diff <= 14.9:
+            range5Loss += 1
+        if 15 <= diff <= 17.9:
+            range6Loss += 1
+        if diff >= 18:
+            range7Loss += 1
+
     # Create table
     row = {cols[0]: time, 'Matchup': matchup, 'Odds Winner': odd_team_win, 'Odds': odd_margin,
            'Simulation Winner': sim_team_win, 'Simulation Margin': sim_margin, 'Bet Margin': diff, 'Bet' : bet}
     rows.append(row)
 
+# Print Matchups and Predictions
 df = pd.DataFrame(rows)
-df = df.sort_values(by = ['Bet Margin'], ascending = False)
-print (df.to_string())
+df = df.sort_values(by=['Bet Margin'], ascending=False)
+print(df.to_string())
+
+# Print Bet Margin Records
+print('\n--{ Beat the Spread: }--\n')
+rows = []
+row = {'Bet Margin Range': '0 - 2.9', 'Record': str(range1Wins) + ' - ' + str(range1Loss)}
+rows.append(row)
+row = {'Bet Margin Range': '3 - 5.9', 'Record': str(range2Wins) + ' - ' + str(range2Loss)}
+rows.append(row)
+row = {'Bet Margin Range': '6 - 8.9', 'Record': str(range3Wins) + ' - ' + str(range3Loss)}
+rows.append(row)
+row = {'Bet Margin Range': '9 - 11.9', 'Record': str(range4Wins) + ' - ' + str(range4Loss)}
+rows.append(row)
+row = {'Bet Margin Range': '12 - 14.9', 'Record': str(range5Wins) + ' - ' + str(range5Loss)}
+rows.append(row)
+row = {'Bet Margin Range': '15 - 17.9', 'Record': str(range6Wins) + ' - ' + str(range6Loss)}
+rows.append(row)
+row = {'Bet Margin Range': '18+', 'Record': str(range7Wins) + ' - ' + str(range7Loss)}
+rows.append(row)
+df = pd.DataFrame(rows)
+print(df.to_string())
+
+# Export to spreadsheet file
 # df.to_csv('odds.csv', index=False)
